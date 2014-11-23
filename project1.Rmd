@@ -1,0 +1,79 @@
+Practical Machine Learning Project 1
+========================================================
+
+Weight Lifting Exercises Dataset Analysis
+
+By analysising weight lifting exercises, the movements of the belt, arm, and dumbbell can help classifying different activities. Selected features for training the model are as the following:
+Belt:
+roll_belt, pitch_belt, yaw_belt, total_accel_belt
+Arm:
+roll_arm, pitch_arm, yaw_arm, total_accel_arm,
+Dumbbell:
+roll_dumbbell, pitch_dumbbell, yaw_dumbbell, total_accel_dumbbell
+
+this project utilizes Caret library to train data model and to do predictions.
+
+```{r}
+library(caret)
+```
+
+Read source files:
+```{r}
+trainData <- read.csv(file="pml-training.csv")
+testData <- read.csv(file="pml-testing.csv")
+```
+
+to Create subset of raw data source for trainging and prediction
+
+```{r}
+trainSet<-trainData[, c("roll_belt","pitch_belt","yaw_belt",
+                        "total_accel_belt","roll_arm","pitch_arm",
+                        "yaw_arm","total_accel_arm","roll_dumbbell",
+                        "pitch_dumbbell","yaw_dumbbell",
+                        "total_accel_dumbbell","classe")]
+
+testSet<-testData[, c("roll_belt","pitch_belt","yaw_belt",
+                      "total_accel_belt","roll_arm","pitch_arm",
+                      "yaw_arm","total_accel_arm","roll_dumbbell",
+                      "pitch_dumbbell","yaw_dumbbell",
+                      "total_accel_dumbbell","problem_id")]
+```
+
+Partition raw training data source to create cross-validation dataset.
+
+```{r}
+inTrain<-createDataPartition(y=trainSet$classe,p=0.8,list=FALSE)
+cvSet<-trainSet[-inTrain,]
+trainSet<-trainSet[inTrain,]
+```
+
+Using Naive Bayes to train data model:
+```{r eval=FALSE}
+model<-train(classe ~ .,data=trainSet,method = "nb")
+```
+
+Applying model to cross-validation set to estimate prediction error:
+
+```{r eval=FALSE}
+prdtCV<-predict(model,cvSet)
+table(prdtCV, cvSet$classe)
+```
+
+prdtCV   A   B   C   D   E <br>
+     A  805 191 215 155  92 <br>
+     B  121 419  64  87 102 <br>
+     C  80  72 326  94  43 <br>
+     D  108  60  62 292  94 <br>
+     E   2  17  17  15 390 <br>
+
+Result comparasion revealed that there's 57% chance the model would give correct prediction.
+
+Applying model to test dataset:
+
+```{r eval=FALSE}
+prdtTst<-predict(model,testSet)
+prdtTst
+```
+
+
+
